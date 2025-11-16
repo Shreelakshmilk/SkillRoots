@@ -1,0 +1,107 @@
+import { Language, Translations } from './types';
+
+export const LANGUAGES: Language[] = [
+  { code: 'en', name: 'English' },
+  { code: 'hi', name: 'Hindi' },
+  { code: 'kn', name: 'Kannada' },
+  { code: 'ta', name: 'Tamil' },
+  { code: 'te', name: 'Telugu' },
+  { code: 'ml', name: 'Malayalam' },
+];
+
+export const UI_TEXT = {
+    title: "SkillRoots",
+    subtitle: "Empowering Rural Artisans with Income Stability",
+    login: "Login",
+    register: "Register",
+    logout: "Logout",
+    name: "Name",
+    email: "Email",
+    welcome: "Welcome",
+    dashboardTitle: "Your Activity Dashboard",
+    videosUploaded: "Videos Uploaded",
+    earnings: "Potential Earnings (INR)",
+    skillsLearned: "Skills Learned",
+    itemsListed: "Items Listed",
+    totalViews: "Total Views",
+    noAccount: "Don't have an account?",
+    haveAccount: "Already have an account?",
+    userExists: "User with this email already exists.",
+    invalidCredentials: "Invalid email or password.",
+    registrationSuccess: "Registration successful! Welcome aboard.",
+    fillFields: "Please fill in all fields.",
+    invalidEmail: "Please enter a valid email address.",
+    
+    menuHome: "Home (Videos)",
+    menuMarketplace: "Marketplace",
+    menuDashboard: "Dashboard",
+    menuUploadVideo: "Upload Video",
+    menuSellItem: "Sell Item",
+    
+    uploadTitle: "Upload Your Creation",
+    uploadSubtitle: "Share your skills with the world by uploading a video.",
+    videoTitleLabel: "Video Title",
+    videoDescLabel: "Video Description",
+    thumbnailUrlLabel: "Thumbnail Image URL",
+    thumbnailUrlPlaceholder: "https://example.com/image.png",
+    videoUrlLabel: "Video File URL",
+    videoUrlPlaceholder: "https://example.com/video.mp4",
+    uploadButton: "Upload Video",
+    uploadSuccess: "Video uploaded successfully!",
+    
+    sellTitle: "Sell Your Product",
+    sellSubtitle: "List an item for sale in our marketplace.",
+    itemNameLabel: "Item Name",
+    itemDescLabel: "Item Description",
+    itemPriceLabel: "Price (INR)",
+    itemImageUrlLabel: "Item Image URL",
+    itemImageUrlPlaceholder: "https://example.com/product.png",
+    sellButton: "List Item for Sale",
+    sellSuccess: "Item listed successfully!",
+
+    myCreations: "My Creations",
+    myProducts: "My Products for Sale",
+    noVideos: "You haven't uploaded any videos yet.",
+    noItems: "You haven't listed any items for sale yet.",
+
+    exploreCreations: "Explore Community Creations",
+    by: "By",
+    views: "Views",
+    yourEarnings: "Your Earnings for this Video",
+    ratePerView: "Rate per View (INR)",
+    estimatedEarnings: "Estimated Earnings",
+    videoDescription: "Description",
+    backToHome: "Back to Home",
+
+    exploreProducts: "Explore Community Marketplace",
+    soldBy: "Sold by",
+    buyNow: "Buy Now",
+    productDescription: "Description",
+    backToMarketplace: "Back to Marketplace",
+    purchaseSuccess: "Thank you for your purchase! The seller has been notified.",
+    noProducts: "There are no products listed in the marketplace yet.",
+
+    // New Landing Page keys
+    landingTitle: "Learn, Create, and Prosper.",
+    landingHeroSubtitle: "Your digital village square to showcase skills, sell creations, and discover handcrafted wonders.",
+    exploreVideosCTA: "Explore Videos",
+    browseMarketCTA: "Browse Marketplace",
+    joinNowCTA: "Join Our Community",
+    featureWatchTitle: "Watch & Learn",
+    featureWatchDesc: "Discover a world of skills from talented artisans. From traditional crafts to modern techniques, learn from community-uploaded videos.",
+    featureShopTitle: "Shop Unique Products",
+    featureShopDesc: "Buy authentic, handcrafted products directly from creators. Every purchase supports an artisan and their story.",
+    featureEmpowerTitle: "Empower Yourself",
+    featureEmpowerDesc: "Share your talent with the world. Upload videos, list your products for sale, and build your own digital storefront.",
+
+    // Improved Auth text
+    loginTitle: "Welcome Back!",
+    loginSubtitle: "Sign in to continue your journey.",
+    registerTitle: "Join the SkillRoots Community",
+    registerSubtitle: "Create an account to start learning, creating, and selling.",
+    loginButton: "Sign In",
+    registerButton: "Create Account",
+
+};
+
+export const INITIAL_TRANSLATIONS: Translations = { ...UI_TEXT };
