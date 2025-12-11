@@ -46,13 +46,15 @@ async function decodeAudioData(
 
 interface VoiceAssistantProps {
   translations: Translations;
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
 }
 
 type ConnectionState = "IDLE" | "CONNECTING" | "CONNECTED" | "ERROR";
 type TranscriptItem = { speaker: 'user' | 'model'; text: string };
 
-const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ translations }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ translations, isOpen, onOpen, onClose }) => {
   const [connectionState, setConnectionState] = useState<ConnectionState>("IDLE");
   const [transcript, setTranscript] = useState<TranscriptItem[]>([]);
   const [statusText, setStatusText] = useState('');
@@ -102,7 +104,6 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ translations }) => {
 
 
   const startSession = useCallback(async () => {
-    setIsOpen(true);
     setConnectionState('CONNECTING');
     setStatusText(translations.voiceAssistantConnecting);
     setTranscript([]);
@@ -111,9 +112,7 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ translations }) => {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaStreamRef.current = stream;
 
-        // Fix: Cast window to `any` to allow access to `webkitAudioContext` for cross-browser compatibility.
         inputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
-        // Fix: Cast window to `any` to allow access to `webkitAudioContext` for cross-browser compatibility.
         outputAudioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
         nextStartTimeRef.current = 0;
 
@@ -191,14 +190,15 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ translations }) => {
                   }
                 },
                 onerror: (e: ErrorEvent) => {
-                    // Fix: Do not log the entire ErrorEvent object as it can contain circular references to the DOM
                     console.error('Live session error:', e.message);
                     setConnectionState('ERROR');
                     setStatusText(e.message || "A connection error occurred.");
-                    closeSession();
+                    // Don't close immediately on minor errors, but for major ones we might need to
+                    // closeSession(); 
                 },
                 onclose: (e: CloseEvent) => {
                     closeSession();
+                    setConnectionState('IDLE');
                 },
             },
             config: {
@@ -212,7 +212,6 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ translations }) => {
             },
         });
     } catch (err) {
-        // Fix: Sanitize error logging
         const errMsg = err instanceof Error ? err.message : String(err);
         console.error('Failed to start session:', errMsg);
         setConnectionState('ERROR');
@@ -221,21 +220,27 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ translations }) => {
         } else {
              setStatusText(errMsg || "Failed to get microphone.");
         }
-        setIsOpen(true); // Keep modal open to show error
     }
   }, [translations, updateTranscript, closeSession]);
 
+  // Sync session state with isOpen prop
+  useEffect(() => {
+    if (isOpen) {
+        if (connectionState === 'IDLE') {
+            startSession();
+        }
+    } else {
+        closeSession();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   const handleFabClick = () => {
     if (isOpen) {
-        handleClose();
+        onClose();
     } else {
-        startSession();
+        onOpen();
     }
-  };
-
-  const handleClose = () => {
-    closeSession();
-    setIsOpen(false);
   };
 
   useEffect(() => {
@@ -258,7 +263,7 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ translations }) => {
       <button
         onClick={handleFabClick}
         className="fixed bottom-6 right-6 bg-orange-600 text-white rounded-full p-4 shadow-lg hover:bg-orange-700 transition-all transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 z-50"
-        aria-label="Open Voice Assistant"
+        aria-label="Toggle Voice Assistant"
       >
         <Mic size={24} />
       </button>
@@ -268,7 +273,7 @@ const VoiceAssistant: React.FC<VoiceAssistantProps> = ({ translations }) => {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg h-[80vh] max-h-[700px] flex flex-col">
             <header className="flex justify-between items-center p-4 border-b border-gray-200">
               <h2 className="text-xl font-bold text-orange-800">{translations.voiceAssistantTitle}</h2>
-              <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                 <X size={24} />
               </button>
             </header>

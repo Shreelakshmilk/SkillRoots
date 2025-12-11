@@ -8,7 +8,7 @@ import { LANGUAGES, INITIAL_TRANSLATIONS, UI_TEXT } from './constants';
 import HomePage from './components/HomePage';
 import MarketplacePage from './components/MarketplacePage';
 import LandingPage from './components/LandingPage';
-import { Home, ShoppingCart, Search, Menu, Bell, Video, User as UserIcon, LoaderCircle, Key } from 'lucide-react';
+import { Home, ShoppingCart, Search, Menu, Bell, Video, User as UserIcon, LoaderCircle, Mic } from 'lucide-react';
 import VoiceAssistant from './components/VoiceAssistant';
 
 export type PublicView = 'landing' | 'videos' | 'market';
@@ -22,27 +22,7 @@ const App: React.FC = () => {
   const [authInfo, setAuthInfo] = useState<{ show: boolean; initialScreen: AuthScreen }>({ show: false, initialScreen: AuthScreen.Login });
   const [publicView, setPublicView] = useState<PublicView>('landing');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isApiKeyReady, setIsApiKeyReady] = useState(false);
-
-  // Check for API Key on mount
-  useEffect(() => {
-    const checkApiKey = async () => {
-      try {
-        if ((window as any).aistudio && (window as any).aistudio.hasSelectedApiKey) {
-          const hasKey = await (window as any).aistudio.hasSelectedApiKey();
-          setIsApiKeyReady(hasKey);
-        } else {
-          // Fallback for environments where window.aistudio is not available
-          setIsApiKeyReady(true);
-        }
-      } catch (e) {
-        console.error("Error checking API key:", e);
-        setIsApiKeyReady(true);
-      }
-    };
-    checkApiKey();
-  }, []);
-
+  
   useEffect(() => {
     const loggedInUser = localStorage.getItem('skillroots_user');
     if (loggedInUser) {
@@ -52,6 +32,8 @@ const App: React.FC = () => {
       setAuthInfo({ ...authInfo, show: false });
     }
   }, []);
+
+  const [isVoiceAssistantOpen, setIsVoiceAssistantOpen] = useState(false);
   
   const handleLanguageChange = async (langCode: string) => {
     if (langCode === selectedLanguage) return;
@@ -97,15 +79,16 @@ const App: React.FC = () => {
   };
 
   const handleApiKeySelect = async () => {
-    if ((window as any).aistudio) {
+    if ((window as any).aistudio && (window as any).aistudio.openSelectKey) {
         try {
             await (window as any).aistudio.openSelectKey();
-            // Assume success to mitigate race condition
-            setIsApiKeyReady(true);
+            // Reload to ensure the environment variables are fresh
+            window.location.reload();
         } catch (error) {
             console.error("API Key selection failed:", error);
-            // If failed (e.g. cancelled), we don't set ready to true
         }
+    } else {
+        alert("API Key selection is not available in this environment.");
     }
   };
 
@@ -137,40 +120,6 @@ const App: React.FC = () => {
       </button>
   );
 
-  if (!isApiKeyReady) {
-    return (
-        <div className="min-h-screen bg-orange-50 flex items-center justify-center p-4">
-            <div className="bg-white max-w-md w-full p-8 rounded-2xl shadow-xl border border-orange-200 text-center animate-fade-in">
-                <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Key size={32} className="text-orange-600" />
-                </div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">Connect to SkillRoots</h1>
-                <p className="text-gray-600 mb-8 leading-relaxed">
-                    To access the AI-powered features like translation, voice assistant, and market insights, please select your Google API Key.
-                </p>
-                <button 
-                    onClick={handleApiKeySelect}
-                    className="w-full bg-orange-600 text-white py-3.5 rounded-xl font-bold text-lg hover:bg-orange-700 transition-transform transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
-                >
-                    <Key size={20} />
-                    Connect API Key
-                </button>
-                <div className="mt-6 pt-6 border-t border-gray-100">
-                    <p className="text-xs text-gray-500 mb-2">Don't have a key?</p>
-                    <a 
-                        href="https://ai.google.dev/gemini-api/docs/billing" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-orange-600 hover:text-orange-800 text-sm font-semibold hover:underline"
-                    >
-                        Get a Gemini API Key
-                    </a>
-                </div>
-            </div>
-        </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
       {/* Platform Header */}
@@ -197,7 +146,7 @@ const App: React.FC = () => {
             </div>
         </div>
 
-        {/* Center: Search Bar (YouTube/Amazon style) */}
+        {/* Center: Search Bar */}
         <div className="hidden md:flex flex-1 max-w-2xl mx-8">
             <div className="flex w-full">
                 <input 
@@ -212,9 +161,12 @@ const App: React.FC = () => {
                 </button>
             </div>
             {/* Voice Mic Button */}
-            <button className="ml-4 bg-gray-100 p-2 rounded-full hover:bg-gray-200">
-                 {/* Placeholder for voice trigger if needed apart from FAB */}
-                 <div className="w-5 h-5 bg-gray-600 rounded-full opacity-50" />
+            <button 
+                onClick={() => setIsVoiceAssistantOpen(true)}
+                className="ml-4 bg-gray-100 p-2 rounded-full hover:bg-gray-200 text-gray-700 transition-colors"
+                title="Voice Assistant"
+            >
+                 <Mic size={20} />
             </button>
         </div>
 
@@ -256,6 +208,12 @@ const App: React.FC = () => {
                              <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                          </div>
                          <button 
+                            onClick={handleApiKeySelect}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                         >
+                            Update API Key
+                         </button>
+                         <button 
                             onClick={handleLogout}
                             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                          >
@@ -286,7 +244,15 @@ const App: React.FC = () => {
         {renderContent()}
       </main>
 
-      {isAuthenticated && <VoiceAssistant translations={translations} />}
+      {/* Global Voice Assistant Overlay */}
+      {isAuthenticated && (
+        <VoiceAssistant 
+            translations={translations} 
+            isOpen={isVoiceAssistantOpen}
+            onOpen={() => setIsVoiceAssistantOpen(true)}
+            onClose={() => setIsVoiceAssistantOpen(false)}
+        />
+      )}
     </div>
   );
 };
