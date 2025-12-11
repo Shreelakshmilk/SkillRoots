@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { User, AuthScreen } from './types';
 import Auth from './components/Auth';
@@ -7,7 +8,8 @@ import { LANGUAGES, INITIAL_TRANSLATIONS, UI_TEXT } from './constants';
 import HomePage from './components/HomePage';
 import MarketplacePage from './components/MarketplacePage';
 import LandingPage from './components/LandingPage';
-import { Home, ShoppingCart } from 'lucide-react';
+import { Home, ShoppingCart, Search, Menu, Bell, Video, User as UserIcon, LoaderCircle } from 'lucide-react';
+import VoiceAssistant from './components/VoiceAssistant';
 
 export type PublicView = 'landing' | 'videos' | 'market';
 
@@ -19,6 +21,7 @@ const App: React.FC = () => {
   const [isTranslating, setIsTranslating] = useState(false);
   const [authInfo, setAuthInfo] = useState<{ show: boolean; initialScreen: AuthScreen }>({ show: false, initialScreen: AuthScreen.Login });
   const [publicView, setPublicView] = useState<PublicView>('landing');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const loggedInUser = localStorage.getItem('skillroots_user');
@@ -64,27 +67,27 @@ const App: React.FC = () => {
     setUser(null);
     setIsAuthenticated(false);
     setAuthInfo({ ...authInfo, show: false });
-    setPublicView('landing'); // Reset to landing page on logout
+    setPublicView('landing');
     localStorage.removeItem('skillroots_user');
   };
   
   const showAuthScreen = (screen: AuthScreen) => {
-    setPublicView('landing'); // Go to a neutral bg for auth
+    setPublicView('landing');
     setAuthInfo({ show: true, initialScreen: screen });
   };
 
   const renderContent = () => {
     if (isAuthenticated && user) {
-        return <MainApp user={user} translations={translations} />;
+        return <MainApp user={user} translations={translations} searchQuery={searchQuery} />;
     }
     if (authInfo.show) {
         return <Auth onLogin={handleLogin} translations={translations} initialScreen={authInfo.initialScreen} />;
     }
     switch(publicView) {
       case 'videos':
-        return <HomePage translations={translations} onVideoSelect={() => {}} user={null} />;
+        return <HomePage translations={translations} onVideoSelect={() => {}} user={null} searchQuery={searchQuery} />;
       case 'market':
-        return <MarketplacePage translations={translations} onItemSelect={() => {}} user={null} />;
+        return <MarketplacePage translations={translations} onItemSelect={() => {}} user={null} searchQuery={searchQuery} />;
       case 'landing':
       default:
         return <LandingPage translations={translations} onNavigate={setPublicView} onShowAuth={showAuthScreen}/>;
@@ -94,35 +97,70 @@ const App: React.FC = () => {
   const PublicViewButton: React.FC<{view: PublicView, label: string, icon: React.ReactNode}> = ({view, label, icon}) => (
      <button 
         onClick={() => { setPublicView(view); setAuthInfo({ ...authInfo, show: false }); }} 
-        className={`px-4 py-2 rounded-md transition duration-300 flex items-center gap-2 ${publicView === view && !authInfo.show ? 'bg-orange-600 text-white' : 'bg-orange-200 text-orange-800 hover:bg-orange-300'}`}
+        className={`px-4 py-2 rounded-full transition duration-300 flex items-center gap-2 ${publicView === view && !authInfo.show ? 'bg-black text-white' : 'hover:bg-gray-100 text-gray-800'}`}
         aria-label={label}
       >
-        {icon} <span className="hidden sm:inline">{label}</span>
+        {icon} <span className="hidden sm:inline font-medium">{label}</span>
       </button>
   );
 
   return (
-    <div className="min-h-screen bg-orange-50 font-serif text-gray-800">
-      <header className="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-50">
-        <div 
-            className="flex items-center space-x-3 cursor-pointer" 
-            onClick={() => { 
-                if (!isAuthenticated) { 
-                    setPublicView('landing'); 
-                    setAuthInfo({...authInfo, show: false}); 
-                } 
-            }}
-        >
-            <img src="https://picsum.photos/50/50?grayscale" alt="SkillRoots Logo" className="h-12 w-12 rounded-full object-cover" />
-            <h1 className="text-2xl md:text-3xl font-bold text-orange-800">{translations.title}</h1>
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
+      {/* Platform Header */}
+      <header className="bg-white shadow-sm px-4 py-2 flex justify-between items-center sticky top-0 z-50 h-16">
+        
+        {/* Left: Logo & Menu */}
+        <div className="flex items-center gap-4">
+            {isAuthenticated && (
+                <button className="p-2 hover:bg-gray-100 rounded-full">
+                    <Menu size={24} className="text-gray-700" />
+                </button>
+            )}
+            <div 
+                className="flex items-center gap-2 cursor-pointer" 
+                onClick={() => { 
+                    if (!isAuthenticated) { 
+                        setPublicView('landing'); 
+                        setAuthInfo({...authInfo, show: false}); 
+                    } 
+                }}
+            >
+                <img src="https://skillrootsinstitute.in/wp-content/uploads/2025/08/cropped-skillroots.png" alt="SkillRoots Logo" className="h-8 w-auto" />
+                <h1 className="text-xl tracking-tight font-bold text-gray-900 hidden md:block">SkillRoots</h1>
+            </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <div className="relative">
+
+        {/* Center: Search Bar (YouTube/Amazon style) */}
+        <div className="hidden md:flex flex-1 max-w-2xl mx-8">
+            <div className="flex w-full">
+                <input 
+                    type="text" 
+                    placeholder="Search videos, products, or skills..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full border border-gray-300 rounded-l-full px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+                <button className="bg-gray-100 border border-l-0 border-gray-300 rounded-r-full px-6 hover:bg-gray-200">
+                    <Search size={20} className="text-gray-600" />
+                </button>
+            </div>
+            {/* Voice Mic Button */}
+            <button className="ml-4 bg-gray-100 p-2 rounded-full hover:bg-gray-200">
+                 {/* Placeholder for voice trigger if needed apart from FAB */}
+                 <div className="w-5 h-5 bg-gray-600 rounded-full opacity-50" />
+            </button>
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Language Selector */}
+          <div className="relative hidden md:flex items-center">
+            {isTranslating && <LoaderCircle size={16} className="animate-spin text-orange-600 mr-2" />}
             <select
               value={selectedLanguage}
               onChange={(e) => handleLanguageChange(e.target.value)}
               disabled={isTranslating}
-              className="appearance-none bg-orange-100 border border-orange-300 text-orange-800 rounded-md py-2 px-4 pr-8 focus:outline-none focus:ring-2 focus:ring-orange-500 cursor-pointer"
+              className="appearance-none bg-transparent text-sm font-medium text-gray-700 py-1 pr-6 cursor-pointer focus:outline-none"
             >
               {LANGUAGES.map((lang) => (
                 <option key={lang.code} value={lang.code}>
@@ -130,47 +168,58 @@ const App: React.FC = () => {
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-orange-800">
-              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-            </div>
-            {isTranslating && <div className="absolute top-full right-0 mt-1 text-xs text-gray-500">Translating...</div>}
           </div>
+
           {isAuthenticated ? (
-            <button
-              onClick={handleLogout}
-              className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition duration-300"
-            >
-              {translations.logout}
-            </button>
+            <div className="flex items-center gap-2">
+                <button className="p-2 hover:bg-gray-100 rounded-full" title="Create">
+                    <Video size={24} className="text-gray-700" />
+                </button>
+                <button className="p-2 hover:bg-gray-100 rounded-full" title="Notifications">
+                    <Bell size={24} className="text-gray-700" />
+                </button>
+                <div className="relative group">
+                    <button className="w-8 h-8 rounded-full bg-orange-600 text-white flex items-center justify-center font-bold text-sm">
+                        {user?.name.charAt(0).toUpperCase()}
+                    </button>
+                    {/* Dropdown */}
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block border border-gray-100">
+                         <div className="px-4 py-2 border-b">
+                             <p className="text-sm font-bold text-gray-900 truncate">{user?.name}</p>
+                             <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                         </div>
+                         <button 
+                            onClick={handleLogout}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                         >
+                            {translations.logout}
+                         </button>
+                    </div>
+                </div>
+            </div>
           ) : (
-             <div className="flex items-center space-x-2">
-                <PublicViewButton view="videos" label={translations.menuHome} icon={<Home size={18}/>} />
-                <PublicViewButton view="market" label={translations.menuMarketplace} icon={<ShoppingCart size={18}/>} />
+             <div className="flex items-center gap-2">
+                <div className="hidden md:flex">
+                    <PublicViewButton view="videos" label="Videos" icon={<Video size={18}/>} />
+                    <PublicViewButton view="market" label="Shop" icon={<ShoppingCart size={18}/>} />
+                </div>
                 <button 
                   onClick={() => showAuthScreen(AuthScreen.Login)}
-                  className={`px-4 py-2 rounded-md transition duration-300 ${authInfo.show && authInfo.initialScreen === AuthScreen.Login ? 'bg-orange-600 text-white' : 'bg-orange-200 text-orange-800 hover:bg-orange-300'}`}
+                  className="ml-2 flex items-center gap-1 border border-gray-300 rounded-full px-4 py-1.5 text-blue-600 font-medium hover:bg-blue-50"
                 >
-                  {translations.login}
-                </button>
-                 <button 
-                  onClick={() => showAuthScreen(AuthScreen.Register)}
-                  className={`px-4 py-2 rounded-md transition duration-300 ${authInfo.show && authInfo.initialScreen === AuthScreen.Register ? 'bg-orange-600 text-white' : 'bg-orange-200 text-orange-800 hover:bg-orange-300'}`}
-                >
-                  {translations.register}
+                  <UserIcon size={18} />
+                  <span>{translations.login}</span>
                 </button>
              </div>
           )}
         </div>
       </header>
 
-      <main className="p-4 md:p-8">
+      <main>
         {renderContent()}
       </main>
 
-      <footer className="text-center p-4 mt-8 text-sm text-gray-500 border-t border-orange-200">
-        <p>&copy; {new Date().getFullYear()} SkillRoots. All rights reserved.</p>
-        <p className="mt-1">{translations.subtitle}</p>
-      </footer>
+      {isAuthenticated && <VoiceAssistant translations={translations} />}
     </div>
   );
 };

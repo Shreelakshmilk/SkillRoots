@@ -1,52 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { User, ActivityStats, Translations, Video, Item } from '../types';
 import StatCard from './StatCard';
 import { UploadCloud, IndianRupee, BookOpen, ShoppingBag, Globe } from 'lucide-react';
-import { db } from '../services/db';
 
 interface DashboardProps {
   user: User;
   translations: Translations;
+  stats: ActivityStats;
+  videos: Video[];
+  items: Item[];
+  isLoading: boolean;
   onVideoSelect: (videoId: string) => void;
   onItemSelect: (itemId: string) => void;
+  onNavigateToProfile: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ user, translations, onVideoSelect, onItemSelect }) => {
-  const [stats, setStats] = useState<ActivityStats>({
-    videosUploaded: 0,
-    earnings: 0,
-    skillsLearned: 0,
-    itemsListed: 0,
-    totalViews: 0,
-  });
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [items, setItems] = useState<Item[]>([]);
-
-  useEffect(() => {
-    const userVideos = db.getVideosForUser(user.email);
-    const userItems = db.getItemsForUser(user.email);
-    
-    setVideos(userVideos.slice().reverse());
-    setItems(userItems.slice().reverse());
-
-    const totalItemValue = userItems.reduce((sum, item) => sum + item.price, 0);
-    const totalViews = userVideos.reduce((sum, video) => sum + video.views, 0);
-    const totalVideoEarnings = totalViews * 0.5; // Example rate: ₹0.5 per view
-
-    const newStats: ActivityStats = {
-      videosUploaded: userVideos.length,
-      earnings: totalItemValue + totalVideoEarnings,
-      skillsLearned: Math.floor(Math.random() * 20), // Still mock
-      itemsListed: userItems.length,
-      totalViews: totalViews,
-    };
-    setStats(newStats);
-  }, [user.email]);
+const Dashboard: React.FC<DashboardProps> = ({ user, translations, stats, videos, items, isLoading, onVideoSelect, onItemSelect, onNavigateToProfile }) => {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-700"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in space-y-8">
       <div>
-        <div className="bg-white p-6 rounded-lg shadow-md mb-8 border border-orange-200">
+        <div 
+          className="bg-white p-6 rounded-lg shadow-md mb-8 border border-orange-200 hover:bg-orange-50 cursor-pointer transition-colors"
+          onClick={onNavigateToProfile}
+          role="button"
+          tabIndex={0}
+          aria-label="View your profile"
+        >
           <h2 className="text-3xl font-bold text-orange-800">
             {translations.welcome}, {user.name}!
           </h2>

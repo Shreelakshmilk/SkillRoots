@@ -16,7 +16,7 @@ const UploadVideo: React.FC<UploadVideoProps> = ({ user, translations, onUploadS
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
@@ -24,7 +24,7 @@ const UploadVideo: React.FC<UploadVideoProps> = ({ user, translations, onUploadS
       setError(translations.fillFields);
       return;
     }
-    const newVideo = db.addVideo(user.email, user.name, title, description, thumbnailUrl, videoUrl);
+    const newVideo = await db.addVideo(user.email, user.name, title, description, thumbnailUrl, videoUrl);
     setSuccess(translations.uploadSuccess);
     setTitle('');
     setDescription('');

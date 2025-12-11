@@ -16,7 +16,7 @@ const SellItem: React.FC<SellItemProps> = ({ user, translations, onSellSuccess }
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
@@ -25,7 +25,7 @@ const SellItem: React.FC<SellItemProps> = ({ user, translations, onSellSuccess }
       setError(translations.fillFields);
       return;
     }
-    db.addItem(user.email, user.name, name, description, priceNumber, imageUrl);
+    await db.addItem(user.email, user.name, name, description, priceNumber, imageUrl);
     setSuccess(translations.sellSuccess);
     setName('');
     setDescription('');

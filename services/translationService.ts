@@ -1,8 +1,7 @@
-import { GoogleGenAI, Type } from "@google/genai";
+
+import { GoogleGenAI } from "@google/genai";
 import { Translations } from '../types';
 import { UI_TEXT } from '../constants';
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const getLanguageName = (code: string): string => {
   switch (code) {
@@ -27,12 +26,13 @@ export const translateText = async (
 
   const languageName = getLanguageName(targetLanguage);
   
-  const properties: { [key: string]: { type: Type.STRING, description: string } } = {};
-  Object.keys(textObject).forEach(key => {
-    properties[key] = { type: Type.STRING, description: `Translation for the key '${key}'` };
-  });
+  // Initialize client
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-  const prompt = `Translate the values in the following JSON object to ${languageName}. Do not translate the keys. It is critical that you return a complete JSON object with all of the original keys.
+  const prompt = `You are an expert translator for a web application. 
+  Translate the values in the following JSON object to ${languageName}. 
+  Do NOT translate the keys. 
+  Keep the structure exactly the same.
   
   Original JSON:
   ${JSON.stringify(textObject, null, 2)}
@@ -44,22 +44,20 @@ export const translateText = async (
         contents: prompt,
         config: {
             responseMimeType: "application/json",
-            responseSchema: {
-                type: Type.OBJECT,
-                properties: properties,
-            },
         },
     });
 
-    const jsonString = response.text.trim();
+    const jsonString = response.text;
+    if (!jsonString) {
+        throw new Error("No text returned from API");
+    }
+
     const translatedFromAPI = JSON.parse(jsonString);
 
     // Create a result object starting with the original text as a fallback.
     const finalTranslations: Translations = { ...textObject };
 
     // Merge the translated values into our result object.
-    // This ensures that even if some keys are missing from the API response,
-    // we still have a complete object with fallbacks.
     for (const key in translatedFromAPI) {
         if (Object.prototype.hasOwnProperty.call(finalTranslations, key)) {
             if (typeof translatedFromAPI[key] === 'string') {

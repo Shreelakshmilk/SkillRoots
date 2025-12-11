@@ -33,7 +33,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin, translations, initialScreen }) => 
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
@@ -48,13 +48,13 @@ const Auth: React.FC<AuthProps> = ({ onLogin, translations, initialScreen }) => 
         return;
       }
 
-      const result = db.registerUser(name, email);
+      const result = await db.registerUser(name, email);
 
       if (result.success && result.user) {
         setSuccess(translations.registrationSuccess);
         // Automatically log in the user after a short delay to show the success message
         setTimeout(() => {
-            onLogin(result.user);
+            onLogin(result.user!);
         }, 1000);
       } else {
         setError(translations[result.error || ''] || "An unknown error occurred.");
@@ -71,7 +71,7 @@ const Auth: React.FC<AuthProps> = ({ onLogin, translations, initialScreen }) => 
         return;
       }
       
-      const foundUser = db.loginUser(email);
+      const foundUser = await db.loginUser(email);
 
       if (foundUser) {
         onLogin(foundUser);

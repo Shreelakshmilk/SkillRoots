@@ -1,3 +1,4 @@
+
 import { Language, Translations } from './types';
 
 export const LANGUAGES: Language[] = [
@@ -37,6 +38,8 @@ export const UI_TEXT = {
     menuDashboard: "Dashboard",
     menuUploadVideo: "Upload Video",
     menuSellItem: "Sell Item",
+    menuMarketInsights: "Market Insights",
+    menuSkillWallet: "Skill Wallet",
     
     uploadTitle: "Upload Your Creation",
     uploadSubtitle: "Share your skills with the world by uploading a video.",
@@ -81,9 +84,8 @@ export const UI_TEXT = {
     purchaseSuccess: "Thank you for your purchase! The seller has been notified.",
     noProducts: "There are no products listed in the marketplace yet.",
 
-    // New Landing Page keys
-    landingTitle: "Learn, Create, and Prosper.",
-    landingHeroSubtitle: "Your digital village square to showcase skills, sell creations, and discover handcrafted wonders.",
+    landingTitle: "Skill Roots",
+    landingHeroSubtitle: "A digital home for artisans.",
     exploreVideosCTA: "Explore Videos",
     browseMarketCTA: "Browse Marketplace",
     joinNowCTA: "Join Our Community",
@@ -94,7 +96,6 @@ export const UI_TEXT = {
     featureEmpowerTitle: "Empower Yourself",
     featureEmpowerDesc: "Share your talent with the world. Upload videos, list your products for sale, and build your own digital storefront.",
 
-    // Improved Auth text
     loginTitle: "Welcome Back!",
     loginSubtitle: "Sign in to continue your journey.",
     registerTitle: "Join the SkillRoots Community",
@@ -102,6 +103,69 @@ export const UI_TEXT = {
     loginButton: "Sign In",
     registerButton: "Create Account",
 
+    profileTitle: "My Profile",
+    profileSummary: "Activity Summary",
+    backToDashboard: "Back to Dashboard",
+
+    marketInsightsTitle: "Market Insights",
+    marketInsightsSubtitle: "Get up-to-date information powered by Google Search.",
+    marketInsightsPlaceholder: "e.g., 'What are popular handmade gift ideas this season?'",
+    marketInsightsButton: "Ask",
+    sourcesTitle: "Sources",
+
+    voiceAssistantTitle: "SkillRoots Assistant",
+    voiceAssistantWelcome: "Hello! How can I help you today? Ask me about crafting, selling, or using the platform.",
+    voiceAssistantListening: "Listening...",
+    voiceAssistantThinking: "Thinking...",
+    voiceAssistantConnecting: "Connecting...",
+    voiceAssistantMicError: "Microphone access denied. Please enable it in your browser settings.",
+
+    paymentTitle: "Secure Checkout",
+    paymentSubtitle: "Choose your preferred payment method",
+    payWith: "Pay with",
+    amountToPay: "Amount to Pay",
+    verifyPayment: "Proceed to Pay",
+    paymentSuccess: "Payment Successful!",
+    verifying: "Processing Payment...",
+    
+    // New Payment specific
+    paymentSelectMethod: "Select Payment Method",
+    payViaUPI: "UPI / QR",
+    payViaCard: "Credit / Debit Card",
+    payViaNetBanking: "Net Banking",
+    
+    cardDetails: "Enter Card Details",
+    cardNumber: "Card Number",
+    expiryDate: "Expiry Date",
+    cvv: "CVV",
+    cardHolderName: "Card Holder Name",
+    
+    enterUpiId: "Enter UPI ID",
+    orPayUsing: "OR Pay Using",
+    phonePe: "PhonePe",
+    gPay: "Google Pay",
+    paytm: "Paytm",
+    
+    selectBank: "Select Bank",
+    popularBanks: "Popular Banks",
+    
+    redirecting: "Redirecting to secure gateway...",
+    orderPlaced: "Your order has been placed successfully.",
+    transactionId: "Transaction ID",
+
+    walletTitle: "My Skill Wallet",
+    walletSubtitle: "Your digital identity and professional reputation.",
+    identityCard: "Digital Identity",
+    didLabel: "DID (Decentralized ID)",
+    reputationScore: "Reputation Score",
+    skillBadges: "Verified Skill Badges",
+    badgeEarned: "Earned",
+    shareIdentity: "Share Identity",
+    identityCopied: "Identity Copied!",
+    badgeVerified: "Verified",
+    badgeCreator: "Creator",
+    badgeMerchant: "Merchant",
+    badgeInfluencer: "Influencer",
 };
 
 export const INITIAL_TRANSLATIONS: Translations = { ...UI_TEXT };

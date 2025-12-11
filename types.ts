@@ -1,3 +1,4 @@
+
 export interface User {
   name: string;
   email: string;
@@ -25,6 +26,15 @@ export interface Item {
   imageUrl: string;
 }
 
+export interface Order {
+  id: string;
+  userId: string;
+  items: Item[];
+  totalAmount: number;
+  date: string;
+  status: 'pending' | 'completed' | 'shipped';
+  paymentMethod: string;
+}
 
 export interface ActivityStats {
   videosUploaded: number;
@@ -47,6 +57,11 @@ export enum AppPage {
   Sell = 'SELL',
   VideoPage = 'VIDEO_PAGE',
   ItemPage = 'ITEM_PAGE',
+  Profile = 'PROFILE',
+  MARKET_INSIGHTS = 'MARKET_INSIGHTS',
+  Payment = 'PAYMENT',
+  SkillWallet = 'SKILL_WALLET',
+  Orders = 'ORDERS',
 }
 
 export interface Language {
