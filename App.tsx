@@ -8,7 +8,7 @@ import { LANGUAGES, INITIAL_TRANSLATIONS, UI_TEXT } from './constants';
 import HomePage from './components/HomePage';
 import MarketplacePage from './components/MarketplacePage';
 import LandingPage from './components/LandingPage';
-import { Home, ShoppingCart, Search, Menu, Bell, Video, User as UserIcon, LoaderCircle } from 'lucide-react';
+import { Home, ShoppingCart, Search, Menu, Bell, Video, User as UserIcon, LoaderCircle, Key } from 'lucide-react';
 import VoiceAssistant from './components/VoiceAssistant';
 
 export type PublicView = 'landing' | 'videos' | 'market';
@@ -22,6 +22,26 @@ const App: React.FC = () => {
   const [authInfo, setAuthInfo] = useState<{ show: boolean; initialScreen: AuthScreen }>({ show: false, initialScreen: AuthScreen.Login });
   const [publicView, setPublicView] = useState<PublicView>('landing');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isApiKeyReady, setIsApiKeyReady] = useState(false);
+
+  // Check for API Key on mount
+  useEffect(() => {
+    const checkApiKey = async () => {
+      try {
+        if ((window as any).aistudio && (window as any).aistudio.hasSelectedApiKey) {
+          const hasKey = await (window as any).aistudio.hasSelectedApiKey();
+          setIsApiKeyReady(hasKey);
+        } else {
+          // Fallback for environments where window.aistudio is not available
+          setIsApiKeyReady(true);
+        }
+      } catch (e) {
+        console.error("Error checking API key:", e);
+        setIsApiKeyReady(true);
+      }
+    };
+    checkApiKey();
+  }, []);
 
   useEffect(() => {
     const loggedInUser = localStorage.getItem('skillroots_user');
@@ -76,6 +96,19 @@ const App: React.FC = () => {
     setAuthInfo({ show: true, initialScreen: screen });
   };
 
+  const handleApiKeySelect = async () => {
+    if ((window as any).aistudio) {
+        try {
+            await (window as any).aistudio.openSelectKey();
+            // Assume success to mitigate race condition
+            setIsApiKeyReady(true);
+        } catch (error) {
+            console.error("API Key selection failed:", error);
+            // If failed (e.g. cancelled), we don't set ready to true
+        }
+    }
+  };
+
   const renderContent = () => {
     if (isAuthenticated && user) {
         return <MainApp user={user} translations={translations} searchQuery={searchQuery} />;
@@ -103,6 +136,40 @@ const App: React.FC = () => {
         {icon} <span className="hidden sm:inline font-medium">{label}</span>
       </button>
   );
+
+  if (!isApiKeyReady) {
+    return (
+        <div className="min-h-screen bg-orange-50 flex items-center justify-center p-4">
+            <div className="bg-white max-w-md w-full p-8 rounded-2xl shadow-xl border border-orange-200 text-center animate-fade-in">
+                <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Key size={32} className="text-orange-600" />
+                </div>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">Connect to SkillRoots</h1>
+                <p className="text-gray-600 mb-8 leading-relaxed">
+                    To access the AI-powered features like translation, voice assistant, and market insights, please select your Google API Key.
+                </p>
+                <button 
+                    onClick={handleApiKeySelect}
+                    className="w-full bg-orange-600 text-white py-3.5 rounded-xl font-bold text-lg hover:bg-orange-700 transition-transform transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                >
+                    <Key size={20} />
+                    Connect API Key
+                </button>
+                <div className="mt-6 pt-6 border-t border-gray-100">
+                    <p className="text-xs text-gray-500 mb-2">Don't have a key?</p>
+                    <a 
+                        href="https://ai.google.dev/gemini-api/docs/billing" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-orange-600 hover:text-orange-800 text-sm font-semibold hover:underline"
+                    >
+                        Get a Gemini API Key
+                    </a>
+                </div>
+            </div>
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
